@@ -33,7 +33,7 @@ Step 6 : CMD 'nginx'
 Removing intermediate container f8a615aa9693
 Successfully built 493675d657a7
 
-$ docker run docker run -p 80:80 -d
+$ docker run server -p 80:80 -d
 
 $ # Run the cors-server (Don't forget to set your api keys in index.js)
 $ node cors-serv/index.js
