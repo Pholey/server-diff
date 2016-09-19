@@ -1,0 +1,266 @@
+@import "kouto-swiss";
+
+normalize();
+
+@import "./variables.styl"
+
+body,
+html,
+#root {
+  height: 100%;
+}
+
+.an-visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity .1s linear;
+}
+
+.an-hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s .1s, opacity .1s linear;
+}
+
+.serv {
+  position: relative;
+}
+
+.overview {
+  background-color: white;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 45vw;
+  height: 93vh;
+  border: 1px solid grey;
+
+
+  .detail-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .icons {
+    display: flex;
+    width: 100%;
+    height: 20vw;
+    align-items: center;
+    justify-content: center;
+
+    .compare-icon {
+      margin: 0 40px;
+
+      // material-ui grumble grumble...
+      height: 60px !important;
+      width: 60px !important;
+    }
+
+
+    .cont .name {
+      display: flex;
+      justify-content: center;
+      margin-top: 25px;
+      text-transform: capitalize;
+    }
+  }
+
+  .icons .lhs, .icons .rhs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 180px;
+    width: 180px;
+    font-size: 80px;
+    font-weight: 900;
+  }
+
+}
+
+.quote-loader {
+  position: absolute;
+  background-color: white;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: center;
+}
+
+.content-wrapper {
+  padding-top: 35px;
+  padding-bottom: 35px;
+  padding-left: 40px;
+  padding-right: 40px;
+
+}
+
+@keyframes fadeIn {
+  from { opacity:0; } to { opacity:1; }
+}
+
+.loader {
+  display: flex;
+  height: 91vh;
+  width: 100vw;
+  align-items: center;
+  justify-content: center;
+  animation-duration:1s;
+  animation-fill-mode:forwards;
+  animation:fadeIn ease-in;
+}
+
+.loader.nav {
+  width: inherit;
+}
+
+.loader.stats {
+  height: 100px;
+  width: inherit;
+  margin-top: 30px;
+}
+
+#d3 > svg > g {
+  opacity: 0;
+  animation-delay: 3s;
+}
+
+#d3 > svg > g.loaded {
+  animation-fill-mode:forwards;
+  animation:fadeIn ease-in;
+  animation-duration:1s;
+  opacity: 1;
+  transition: visibility 0s .1s, opacity .1s linear;
+}
+
+body {
+  font-size: 16px;
+}
+
+:root {
+  font-size: 1px;
+}
+
+a {
+  text-decoration: none;
+}
+
+
+// D3 ========================================================================
+.node {
+  cursor: pointer;
+}
+
+.node:hover {
+  stroke: #000;
+  stroke-width: 1.5px;
+
+  .label {
+    visibility: visible;
+  }
+}
+
+.node--leaf {
+  fill: white;
+}
+
+.E,.A {
+  fill: #FFAE00;
+  color: #FFAE00 !important;
+}
+
+
+.D {
+  fill: #FF1300;
+  color: #FF1300 !important;
+
+  &.inverted {
+    fill: #00E528;
+    color: #00E528 !important;
+  }
+
+}
+
+.N, .new{
+  fill: #00E528;
+  color: #00E528 !important;
+
+  &.inverted {
+    fill: #FF1300;
+    color: #FF1300 !important;
+  }
+}
+
+.details  {
+  height: inherit;
+  overflow: auto;
+}
+
+.label {
+  font: 11px "Helvetica Neue", Helvetica, Arial, sans-serif;
+  text-anchor: middle;
+  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff, 0 -1px 0 #fff;
+  visibility: visible;
+}
+
+
+.label,
+.node--root,
+.node--leaff {
+  transform: translateZ(0);
+  pointer-events: none;
+}
+
+.visual {
+  background-color: "grey";
+}
+
+// ===================================================================
+.site-wrapper {
+  background-color: white;
+  top: 0;
+  position: absolute;
+  height: 100%;
+  width: 100vw;
+  transition: width 1s
+  right: 0;
+
+  .name,.title-container {
+    display: flex;
+    align-items: center;
+  }
+
+  .title-container {
+    justify-content: space-between;
+  }
+
+  .name .bubble {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 100px;
+
+    &.a {
+      background-color: #FF1300;
+      margin-right: 15px;
+
+    }
+
+    &.b {
+      background-color: #FFAE00;
+      margin-left: 15px;
+    }
+
+  }
+
+}
+
+
+// ============================================================

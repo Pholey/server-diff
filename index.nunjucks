@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{{ config.name }}</title>
+
+  <!-- Make all relative paths, relative to root on web -->
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <!-- Disable tap highlight on windows 8 IE -->
+  <meta name="msapplication-tap-highlight" content="no">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="assets/app.css">
+  <link rel="stylesheet" href="assets/vendor.css">
+
+  {% if env == "development" %}
+    <!-- LiveReload -->
+    <script src="http://{{ host }}:{{ ports.livereload }}/livereload.js?snipver=1"></script>
+
+    <!-- Webpack Development Server -->
+    <script src="http://{{ host }}:{{ ports.webpack }}/webpack-dev-server.js"></script>
+  {% endif %}
+</head>
+
+<script type="javascript/worker">
+    class Diff {
+      constructor(value, kind, description) {
+        this.value = value;
+        this.kind = kind;
+        this.id = (Math.random().toString(36)+'00000000000000000').slice(2, 22+2);
+        this.description = description
+      }
+    }
+
+    function hasKind(currentNode) {
+        var i,
+            currentChild,
+            result;
+
+        if (currentNode.kind != null) {
+            return true;
+        } else {
+
+            if (currentNode.children == null) return false
+
+            for (i = 0; i < currentNode.children.length; i += 1) {
+
+                currentChild = currentNode.children[i];
+
+                // Search in the current child
+                result = hasKind(currentChild);
+
+                // Return the result if the node has been found
+                if (result !== false) {
+                    return result;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    self.onmessage = function(e) {
+      importScripts(e.data.url + "/assets/deep-diff.js")
+      importScripts(e.data.url + "/assets/lodash.js")
+
+      function getKind(x) {
+        // Already has been processed and the kind has been determined
+        if (!(x instanceof Diff)) {
+          // Normalize the plain value into a Diff object
+          x = new Diff(x, null);
+        };
+
+        return {
+          kind: x.kind,
+          value: x.value,
+          id: x.id,
+          description: x.description,
+        }
+      }
+
+
+      function model(data, name, props={}) {
+
+        if (_.isObject(data)) {
+          return _.map(data, (v, key) => {
+            let {kind, id, value, description} = getKind(v);
+
+            const baseProps = {id, kind, name: key, description, children: []}
+
+            let props
+            if (!_.isObject(value)) {
+              props = _.merge({}, baseProps, {size: 1})
+            } else {
+              const c = _.filter(model(value, key), x => hasKind(x))
+              props = _.merge({}, baseProps, {children: c})
+            }
+
+            return props;
+          });
+        }
+
+        return data;
+      }
+
+      function setPropByString(obj, prop, value, delim="."){
+          // property not found
+          if(typeof obj === 'undefined') return false;
+
+          // index of next property split
+          var _index = prop.indexOf(delim)
+
+          // We got some more work to do
+          if(_index > -1){
+              // get the object, pass on the rest
+              return setPropByString(
+                obj[prop.substring(0, _index)],
+                prop.substr(_index+1),
+                value,
+                delim
+              );
+          }
+
+          // We have already set this prop
+          if (typeof obj[prop] === "string") return
+
+          // no split; set property
+          obj[prop] = value;
+      }
+
+      var deepDiff = self.DeepDiff;
+      var _ = self._;
+
+      var combinations = e.data.c;
+      var margin = e.data.browser.margin;
+      var diameter = e.data.browser.diameter;
+
+      var diffs = [];
+      var all = _.merge({}, combinations[0], combinations[1]);
+      _.each(deepDiff.apply(null, combinations), function (diffed) {
+        var type = diffed.kind;
+
+        // If this were to come down the pipe..
+        var path = diffed.path.join("\0");
+
+        var d = new Diff(null, type, diffed);
+
+        // Save our diffs for later lookup
+        setPropByString(all, path, d, "\0");
+        diffs.push(diffed)
+      })
+
+      postMessage({type: "stats", value: diffs})
+
+      // Convert the structure of the diffed object to one d3 will take
+      const modeled = model(all);
+
+      postMessage({type: "modeled", value: modeled});
+    };
+</script>
+
+<body>
+  <div id="root"></div>
+
+  <!-- Javascript -->
+  <script src="assets/vendor.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
